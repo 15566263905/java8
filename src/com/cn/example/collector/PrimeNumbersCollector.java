@@ -18,12 +18,35 @@ public class PrimeNumbersCollector
     implements Collector<Integer, Map<Boolean, List<Integer>>, Map<Boolean, List<Integer>>> {
 
   public static void main(String[] args) {
+    PrimeNumbersCollector primeNumbersCollector = new PrimeNumbersCollector();
     int n = 9;
     Map<Boolean, List<Integer>> result = IntStream.rangeClosed(2, n).boxed()
-        .collect(new PrimeNumbersCollector());
+        .collect(primeNumbersCollector);
 
     result.forEach((k1,v1)->v1.forEach(v2->System.out.println(v2)));
 
+    System.out.println("--------------------------");
+    result = primeNumbersCollector.partitionPrimesWithCustomCollector(9);
+    result.forEach((k1,v1)->v1.forEach(v2->System.out.println(v2)));
+
+  }
+
+  // 除了实现接口外，还可以实现
+  public Map<Boolean, List<Integer>> partitionPrimesWithCustomCollector(int n) {
+    return IntStream.rangeClosed(2, n).boxed()
+      .collect(
+          () -> new HashMap<Boolean, List<Integer>>(2) {{
+            put(true, new ArrayList<>());
+            put(false, new ArrayList<>());
+          }},
+          (acc, candidate) -> {
+            acc.get(isPrime(acc.get(true), candidate) )
+                .add(candidate);
+          },
+          (map1, map2) -> {
+            map1.get(true).addAll(map2.get(true));
+            map1.get(false).addAll(map2.get(false));
+          });
   }
 
   /**
